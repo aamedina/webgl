@@ -1,7 +1,8 @@
 (ns webgl.hello-fragment
   (:gen-shader
-   :program :fragment))
+   :program :fragment
+   :uniforms [[vec4 color]]))
 
 (defn -main
   []
-  (set! (gl-frag-color) [0.0 1.0 1.0 1.0]))
+  (set! (gl-frag-color) color))

@@ -1,8 +1,10 @@
 (ns webgl.hello-vertex
   (:gen-shader
-   :program :vertex))
+   :program :vertex
+   :attributes [[vec4 pos]
+                [float size]]))
 
 (defn -main
   []
-  (set! (gl-position) [0.0 0.0 0.0 1.0])
-  (set! (gl-point-size) 300.0))
+  (set! (gl-position) pos)
+  (set! (gl-point-size) size))

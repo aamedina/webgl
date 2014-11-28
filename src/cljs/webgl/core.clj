@@ -2,14 +2,15 @@
   (:refer-clojure :exclude [compile flush])
   (:require [clojure-gl.compiler :refer [compile-ns]]            
             [clojure.tools.logging :as log]
-            [cljs.analyzer :as ana]))
+            [cljs.analyzer :as ana])
+  (:import cljs.tagged_literals.JSValue))
 
 (defonce cljs-files #{})
 
 (defmacro compile
   [shader-ns]
   (when-not (contains? cljs-files ana/*cljs-file*)
-    (alter-var-root #'cljs-files conj ana/*cljs-file*))  
+    (alter-var-root #'cljs-files conj ana/*cljs-file*))
   (compile-ns shader-ns))
 
 (defmacro context-attributes
@@ -262,6 +263,14 @@
   [program name]
   `(.getAttribLocation *gl* ~program ~name))
 
+(defmacro uniform-location
+  [program name]
+  `(.getUniformLocation *gl* ~program ~name))
+
+(defmacro uniform
+  [program location]
+  `(.getUniform *gl* ~program ~location))
+
 (defmacro buffer-parameter
   [target pname]
   `(.getBufferParameter *gl* ~target ~pname))
@@ -329,4 +338,129 @@
   [vertex fragment]
   `(let [program# (program ~vertex ~fragment)]
      (set! (.-program *gl*) program#)
-     (use-program program#)))
+     (use-program program#)
+     program#))
+
+(defmacro vertex-attrib-1f
+  [attrib x]
+  `(.vertexAttrib1f *gl* ~attrib ~x))
+
+(defmacro vertex-attrib-2f
+  [attrib x y]
+  `(.vertexAttrib2f *gl* ~attrib ~x ~y))
+
+(defmacro vertex-attrib-3f
+  [attrib x y z]
+  `(.vertexAttrib3f *gl* ~attrib ~x ~y ~z))
+
+(defmacro vertex-attrib-4f
+  [attrib x y z w]
+  `(.vertexAttrib4f *gl* ~attrib ~x ~y ~z ~w))
+
+(defmacro vertex-attrib-1fv
+  [attrib v]
+  `(.vertexAttrib1fv *gl* ~attrib ~v))
+
+(defmacro vertex-attrib-2fv
+  [attrib v]
+  `(.vertexAttrib2fv *gl* ~attrib ~v))
+
+(defmacro vertex-attrib-3fv
+  [attrib v]
+  `(.vertexAttrib3fv *gl* ~attrib ~v))
+
+(defmacro vertex-attrib-4fv
+  [attrib v]
+  `(.vertexAttrib4fv *gl* ~attrib ~v))
+
+(defmacro uniform-1i
+  [attrib x]
+  `(.uniform1i *gl* ~attrib ~x))
+
+(defmacro uniform-2i
+  [attrib x y]
+  `(.uniform2i *gl* ~attrib ~x ~y))
+
+(defmacro uniform-3i
+  [attrib x y z]
+  `(.uniform3i *gl* ~attrib ~x ~y ~z))
+
+(defmacro uniform-4i
+  [attrib x y z w]
+  `(.uniform4i *gl* ~attrib ~x ~y ~z ~w))
+
+(defmacro uniform-1fv
+  [attrib v]
+  `(.uniform1fv *gl* ~attrib ~v))
+
+(defmacro uniform-2fv
+  [attrib v]
+  `(.uniform1fv *gl* ~attrib ~v))
+
+(defmacro uniform-3fv
+  [attrib v]
+  `(.uniform3fv *gl* ~attrib ~v))
+
+(defmacro uniform-4fv
+  [attrib v]
+  `(.uniform4fv *gl* ~attrib ~v))
+
+(defmacro uniform-1iv
+  [attrib v]
+  `(.uniform1iv *gl* ~attrib ~v))
+
+(defmacro uniform-2iv
+  [attrib v]
+  `(.uniform1iv *gl* ~attrib ~v))
+
+(defmacro uniform-3iv
+  [attrib v]
+  `(.uniform3iv *gl* ~attrib ~v))
+
+(defmacro uniform-4iv
+  [attrib v]
+  `(.uniform4iv *gl* ~attrib ~v))
+
+(defmacro uniform-mat2
+  [attrib transpose v]
+  `(.uniformMatrix2fv *gl* ~attrib ~transpose ~v))
+
+(defmacro uniform-mat3
+  [attrib transpose v]
+  `(.uniformMatrix3fv *gl* ~attrib ~transpose ~v))
+
+(defmacro uniform-mat4
+  [attrib transpose v]
+  `(.uniformMatrix4fv *gl* ~attrib ~transpose ~v))
+
+(defmacro vec2
+  [& [x y :as vec]]
+  `(js/Float32Array. ~(JSValue. vec)))
+
+(defmacro vec3
+  [& [x y z :as vec]]
+  `(js/Float32Array. ~(JSValue. vec)))
+
+(defmacro vec4
+  [& [x y z w :as vec]]
+  `(js/Float32Array. ~(JSValue. vec)))
+
+(defmacro mat2
+  [& xs]
+  (let [v (vec xs)]
+    `(js/Float32Array. ~(JSValue. (into [] (for [n (range 4)]
+                                             (or (get v n) 0.0)))))))
+
+(defmacro mat3
+  [& xs]
+  (let [v (vec xs)]
+    `(js/Float32Array. ~(JSValue. (into [] (for [n (range 9)]
+                                             (or (get v n) 0.0)))))))
+
+(defmacro mat4
+  [& xs]
+  (let [v (vec xs)]
+    `(js/Float32Array. ~(JSValue. (into [] (for [n (range 16)]
+                                             (or (get v n) 0.0)))))))
+
+
