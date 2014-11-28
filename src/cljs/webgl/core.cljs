@@ -8,8 +8,6 @@
             [goog.style :as s])
   (:require-macros [webgl.core :as gl]))
 
-(defonce app-state (atom {}))
-
 (defonce ^:dynamic *gl* nil)
 
 (defprotocol IInitProgram
@@ -152,20 +150,23 @@
     (init-attribs [_]
       {:size 10.0})
     (init-uniforms [_]
-      {:color (gl/vec4 1.0 0.0 0.0 1.0)})
+      {:translation (gl/vec4 0.5 0.5 0.0 0.0)
+       :color (gl/vec4 1.0 0.0 0.0 1.0)})
     IDidMount
     (did-mount [this canvas]
-      (e/listen canvas et/MOUSEDOWN (.-onClick this) false this)
+      ;; (e/listen canvas et/MOUSEDOWN (.-onClick this) false this)
       (gl/clear-color 0.0 0.0 0.0 1.0)
       (gl/clear gl/COLOR_BUFFER_BIT)
-      (gl/draw-arrays gl/POINT 0 (/ (alength (get-attrib owner :pos)) 2)))
+      (gl/draw-arrays gl/LINE_LOOP 0 3))
     IWillUnmount
     (will-unmount [this canvas]
-      (e/unlisten canvas et/MOUSEDOWN (.-onClick this) false this))
+      ;; (e/unlisten canvas et/MOUSEDOWN (.-(onClick this) false this)
+      )
     IRender
     (render [_])))
 
+(def app-state (atom {:canvas my-canvas}))
+
 (defn -main
   []
-  (swap! app-state assoc :canvas my-canvas)
   (om/root canvas app-state {:target (sel1 :#app)}))
