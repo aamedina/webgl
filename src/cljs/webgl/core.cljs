@@ -43,8 +43,10 @@
 
 (defn setup
   [data owner]
+  (gl/init-shaders webgl.hello-vertex webgl.hello-fragment)
   (gl/clear-color 0.0 0.0 0.0 1.0)
-  (gl/clear gl/COLOR_BUFFER_BIT))
+  (gl/clear gl/COLOR_BUFFER_BIT)
+  (gl/draw-arrays gl/POINTS 0 1))
 
 (defn render
   [data owner]

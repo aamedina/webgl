@@ -4,4 +4,4 @@
 
 (defn -main
   []
-  (set! (gl-frag-color) [1.0 0.0 0.0 1.0]))
+  (set! (gl-frag-color) [0.0 1.0 1.0 1.0]))

@@ -9,14 +9,8 @@
 (defmacro compile
   [shader-ns]
   (when-not (contains? cljs-files ana/*cljs-file*)
-    (alter-var-root #'cljs-files conj ana/*cljs-file*))
+    (alter-var-root #'cljs-files conj ana/*cljs-file*))  
   (compile-ns shader-ns))
-
-(defmacro shader-material
-  [vertex fragment opts]
-  `(THREE.ShaderMaterial. (doto ~opts
-                            (aset "vertexShader" (compile ~vertex))
-                            (aset "fragmentShader" (compile ~fragment)))))
 
 (defmacro context-attributes
   []
@@ -304,7 +298,7 @@
   [shader]
   `(let [shader# ~shader
          _# (.compileShader *gl* shader#)
-         status# (shader-parameter shader# gl/COMPILE_STATUS)]
+         status# (shader-parameter shader# goog.webgl/COMPILE_STATUS)]
          (if (pos? status#)
            shader#
            (do (js/console.log (.getShaderInfoLog *gl* shader#))
