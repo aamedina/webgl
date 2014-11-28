@@ -54,11 +54,7 @@
         2 (gl/vertex-attrib-2fv attrib v)
         3 (gl/vertex-attrib-3fv attrib v)
         4 (gl/vertex-attrib-4fv attrib v)
-        (let [buffer (gl/create-buffer)]
-          (gl/bind-buffer gl/ARRAY_BUFFER buffer)
-          (gl/buffer-data gl/ARRAY_BUFFER v gl/STATIC_DRAW)
-          (gl/vertex-attrib-pointer attrib 2 gl/FLOAT false 0 0)
-          (gl/enable-vertex-attrib-array attrib)))
+        (gl/enable-vertex-attrib-array attrib))
       (gl/vertex-attrib-1f attrib v))
     (om/set-state-nr! owner [:attributes k] v)))
 
@@ -81,6 +77,14 @@
 (defn get-uniform
   [owner k]
   (om/get-state owner [:uniforms k]))
+
+(defn update-attrib!
+  [owner k f & args]
+  (set-attrib! owner k (apply f (get-attrib owner k) args)))
+
+(defn update-uniform!
+  [owner k f & args]
+  (set-uniform! owner k (apply f (get-uniform owner k) args)))
 
 (def ^boolean resizing? false)
 
@@ -146,24 +150,40 @@
     (init-program [_]
       (gl/init-shaders webgl.hello-vertex webgl.hello-fragment))
     (init-vertices [_]
-      {:pos (js/Float32Array. #js [0.0 0.5 -0.5 -0.5 0.5 -0.5])})
+      (let [buffer (gl/create-buffer)
+            v (js/Float32Array. #js [0.0   0.5 1.0 0.0 0.0
+                                     -0.5 -0.5 0.0 1.0 0.0
+                                     0.5  -0.5 0.0 0.0 1.0])
+            a-pos (gl/attrib-location (.-program *gl*) "pos")
+            a-color (gl/attrib-location (.-program *gl*) "color")]
+        (gl/bind-buffer gl/ARRAY_BUFFER buffer)
+        (gl/buffer-data gl/ARRAY_BUFFER v gl/STATIC_DRAW)
+        (gl/vertex-attrib-pointer a-pos 2 gl/FLOAT false 20 0)
+        (gl/vertex-attrib-pointer a-color 3 gl/FLOAT false 20 8)
+        {:pos v
+         :color v}))
     (init-attribs [_]
-      {:size 10.0})
+      {:theta 0.0})
     (init-uniforms [_]
-      {:translation (gl/vec4 0.5 0.5 0.0 0.0)
-       :color (gl/vec4 1.0 0.0 0.0 1.0)})
+      {:width js/window.innerWidth
+       :height js/window.innerHeight})
     IDidMount
     (did-mount [this canvas]
+      (gl/bind-buffer gl/ARRAY_BUFFER nil)
       ;; (e/listen canvas et/MOUSEDOWN (.-onClick this) false this)
       (gl/clear-color 0.0 0.0 0.0 1.0)
       (gl/clear gl/COLOR_BUFFER_BIT)
-      (gl/draw-arrays gl/LINE_LOOP 0 3))
+      (gl/draw-arrays gl/TRIANGLES 0 3))
     IWillUnmount
     (will-unmount [this canvas]
       ;; (e/unlisten canvas et/MOUSEDOWN (.-(onClick this) false this)
       )
     IRender
-    (render [_])))
+    (render [_]
+      (let [theta (mod (+ (get-attrib owner :theta) 0.5) 360)]
+        (gl/clear gl/COLOR_BUFFER_BIT)
+        (set-attrib! owner :theta theta)
+        (gl/draw-arrays gl/TRIANGLES 0 3)))))
 
 (def app-state (atom {:canvas my-canvas}))
 

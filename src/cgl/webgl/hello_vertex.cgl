@@ -2,12 +2,12 @@
   (:gen-shader
    :program :vertex
    :attributes [[vec4 pos]
-                [float size]
+                [vec4 color]
                 [float theta]]
-   :uniforms [[vec4 translation]])
+   :varyings [[vec4 v-color]])
   (:require [webgl.math :as math]))
 
 (defn -main
   []
   (set! (gl-position) (math/rotate pos theta))
-  (set! (gl-point-size) size))
+  (set! v-color color))
