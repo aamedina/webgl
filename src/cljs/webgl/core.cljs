@@ -16,6 +16,7 @@
   (init-attribs [this])
   (init-uniforms [this])
   (init-varyings [this])
+  (init-vertices [this])
   (init-program [this]))
 
 (defprotocol IDidMount
@@ -36,6 +37,7 @@
   (init-attribs [_])
   (init-uniforms [_])
   (init-varyings [_])
+  (init-vertices [_])
   IDidMount
   (did-mount [_ canvas])
   IWillUnmount
@@ -53,7 +55,12 @@
         1 (gl/vertex-attrib-1fv attrib v)
         2 (gl/vertex-attrib-2fv attrib v)
         3 (gl/vertex-attrib-3fv attrib v)
-        4 (gl/vertex-attrib-4fv attrib v))
+        4 (gl/vertex-attrib-4fv attrib v)
+        (let [buffer (gl/create-buffer)]
+          (gl/bind-buffer gl/ARRAY_BUFFER buffer)
+          (gl/buffer-data gl/ARRAY_BUFFER v gl/STATIC_DRAW)
+          (gl/vertex-attrib-pointer attrib 2 gl/FLOAT false 0 0)
+          (gl/enable-vertex-attrib-array attrib)))
       (gl/vertex-attrib-1f attrib v))
     (om/set-state-nr! owner [:attributes k] v)))
 
@@ -66,8 +73,16 @@
         2 (gl/uniform-2fv uniform v)
         3 (gl/uniform-3fv uniform v)
         4 (gl/uniform-4fv uniform v))
-      (gl/uniform-1i uniform v))
+      (gl/uniform-1f uniform v))
     (om/set-state-nr! owner [:uniforms k] v)))
+
+(defn get-attrib
+  [owner k]
+  (om/get-state owner [:attributes k]))
+
+(defn get-uniform
+  [owner k]
+  (om/get-state owner [:uniforms k]))
 
 (def ^boolean resizing? false)
 
@@ -87,10 +102,11 @@
           (set-attrib! owner k v))
         (doseq [[k v] (init-uniforms o)]
           (set-uniform! owner k v))
+        (doseq [[k v] (init-vertices o)]
+          (set-attrib! owner k v))
         (did-mount o node)
         (letfn [(render-frame []
                   (set! frame (js/requestAnimationFrame render-frame))
-                  
                   (when resizing?
                     (set! resizing? false)
                     (.viewport *gl* 0 0
@@ -126,22 +142,23 @@
         (om/set-state! owner :points points)
         (gl/clear gl/COLOR_BUFFER_BIT)
         (doseq [[x y] points]
-          (js/console.log x y)
           (set-attrib! owner :pos (gl/vec4 x y 0.0 1.0))
           (gl/draw-arrays gl/POINTS 0 1))))
     IInitProgram
     (init-program [_]
       (gl/init-shaders webgl.hello-vertex webgl.hello-fragment))
+    (init-vertices [_]
+      {:pos (js/Float32Array. #js [0.0 0.5 -0.5 -0.5 0.5 -0.5])})
     (init-attribs [_]
-      {:pos (gl/vec4 0.0 0.0 0.0 1.0)
-       :size 10.0})
+      {:size 10.0})
     (init-uniforms [_]
       {:color (gl/vec4 1.0 0.0 0.0 1.0)})
     IDidMount
     (did-mount [this canvas]
       (e/listen canvas et/MOUSEDOWN (.-onClick this) false this)
       (gl/clear-color 0.0 0.0 0.0 1.0)
-      (gl/clear gl/COLOR_BUFFER_BIT))
+      (gl/clear gl/COLOR_BUFFER_BIT)
+      (gl/draw-arrays gl/POINT 0 (/ (alength (get-attrib owner :pos)) 2)))
     IWillUnmount
     (will-unmount [this canvas]
       (e/unlisten canvas et/MOUSEDOWN (.-onClick this) false this))

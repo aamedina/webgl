@@ -81,6 +81,10 @@
   [target data usage]
   `(.bufferData *gl* ~target ~data ~usage))
 
+(defmacro vertex-attrib-pointer
+  [index size type normalized? stride offset]
+  `(.vertexAttribPointer *gl* ~index ~size ~type ~normalized? ~stride ~offset))
+
 (defmacro buffer-sub-data
   [target offset data]
   `(.bufferSubData *gl* ~target ~offset ~data))
@@ -388,6 +392,22 @@
 (defmacro uniform-4i
   [attrib x y z w]
   `(.uniform4i *gl* ~attrib ~x ~y ~z ~w))
+
+(defmacro uniform-1f
+  [attrib x]
+  `(.uniform1f *gl* ~attrib ~x))
+
+(defmacro uniform-2f
+  [attrib x y]
+  `(.uniform2f *gl* ~attrib ~x ~y))
+
+(defmacro uniform-3f
+  [attrib x y z]
+  `(.uniform3f *gl* ~attrib ~x ~y ~z))
+
+(defmacro uniform-4f
+  [attrib x y z w]
+  `(.uniform4f *gl* ~attrib ~x ~y ~z ~w))
 
 (defmacro uniform-1fv
   [attrib v]
