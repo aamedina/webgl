@@ -1,0 +1,7 @@
+(ns webgl.hello-fragment
+  (:gen-shader
+   :program :fragment))
+
+(defn -main
+  []
+  (set! (gl-frag-color) [1.0 0.0 0.0 1.0]))
