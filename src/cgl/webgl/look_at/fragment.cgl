@@ -1,0 +1,8 @@
+(ns webgl.look-at.fragment
+  (:gen-shader
+   :program :fragment
+   :varyings [[vec4 v-color]]))
+
+(defn -main
+  []
+  (set! (gl-frag-color) v-color))

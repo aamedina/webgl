@@ -252,28 +252,39 @@
   `(.generateMipmap *gl* ~target))
 
 (defmacro active-attrib
-  [program index]
-  `(.getActiveAttrib *gl* ~program ~index))
+  ([index]
+   `(active-attrib (.-program *gl*) ~index))
+  ([program index]
+   `(.getActiveAttrib *gl* ~program ~index)))
 
 (defmacro active-uniform
-  [program index]
-  `(.getActiveUniform *gl* ~program ~index))
+  ([index]
+   `(active-uniform (.-program *gl*) ~index))
+  ([program index]
+   `(.getActiveUniform *gl* ~program ~index)))
 
 (defmacro attached-shaders
-  [program]
-  `(.getAttachedShaders *gl* ~program))
+  ([] `(attached-shaders (.-program *gl*)))
+  ([program]
+   `(.getAttachedShaders *gl* ~program)))
 
 (defmacro attrib-location
-  [program name]
-  `(.getAttribLocation *gl* ~program ~name))
+  ([name]
+   `(attrib-location (.-program *gl*) ~name))
+  ([program name]
+   `(.getAttribLocation *gl* ~program ~name)))
 
 (defmacro uniform-location
-  [program name]
-  `(.getUniformLocation *gl* ~program ~name))
+  ([name]
+   `(uniform-location (.-program *gl*) ~name))
+  ([program name]
+   `(.getUniformLocation *gl* ~program ~name)))
 
 (defmacro uniform
-  [program location]
-  `(.getUniform *gl* ~program ~location))
+  ([location]
+   `(uniform (.-program *gl*) ~location))
+  ([program location]
+   `(.getUniform *gl* ~program ~location)))
 
 (defmacro buffer-parameter
   [target pname]
@@ -484,3 +495,6 @@
                                              (or (get v n) 0.0)))))))
 
 
+(defmacro viewport
+  [x y width height]
+  `(.viewport *gl* ~x ~y ~width ~height))

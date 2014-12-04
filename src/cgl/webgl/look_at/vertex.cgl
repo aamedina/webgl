@@ -1,0 +1,12 @@
+(ns webgl.look-at.vertex
+  (:gen-shader
+   :program :vertex
+   :uniforms [[mat4 model-view-matrix]]
+   :varyings [[vec4 v-color]]
+   :attributes [[vec4 a-pos]
+                [vec4 a-color]]))
+
+(defn -main
+  []
+  (set! (gl-position) (* model-view-matrix a-pos))
+  (set! v-color a-color))

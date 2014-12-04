@@ -1,7 +1,7 @@
 (ns user
   (:require [figwheel.client :as fw]
             [weasel.repl :as repl]
-            [webgl.core :refer [-main]]))
+            [webgl.examples :refer [-main]]))
 
 (enable-console-print!)
 
